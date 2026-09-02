@@ -6,6 +6,12 @@ data/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Claude Code local state (machine-specific, never commit) ###
+.claude/settings.local.json
+
+### Git Bash crash dumps ###
+*.stackdump
+
 ### STS ###
 .apt_generated
 .classpath
@@ -14,7 +20,7 @@ data/
 .settings
 .springBeans
 .sts4-cache
-
+.claude
 ### IntelliJ IDEA ###
 .idea
 *.iws
