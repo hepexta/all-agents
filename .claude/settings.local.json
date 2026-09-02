@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./mvnw -pl core -am compile -q)",
+      "Bash(./mvnw -pl app -am compile -q)",
+      "Bash(sed -i 's/messages.get\\(i\\).getContent\\(\\)/messages.get\\(i\\).getText\\(\\)/' app/src/main/java/com/hepexta/allagents/ai/GuardrailAdvisor.java)",
+      "Bash(sed -i 's/return message.getContent\\(\\);/return message.getText\\(\\);/' app/src/main/java/com/hepexta/allagents/adapters/out/memory/JdbcChatMemory.java)",
+      "Bash(sed -i 's/private static AgentDefinition definition\\(\\)/private static AgentDefinition agentDefinition\\(\\)/; s/super\\(definition\\(\\)\\);/super\\(agentDefinition\\(\\)\\);/' app/src/main/java/com/hepexta/allagents/agents/master/MasterAgent.java app/src/main/java/com/hepexta/allagents/agents/pdf/PdfExtractionAgent.java)",
+      "Bash(sed -i 's/spec.options\\(ChatOptions.builder\\(\\).temperature\\(p.temperature\\(\\)\\).build\\(\\)\\)/spec.options\\(ChatOptions.builder\\(\\).temperature\\(p.temperature\\(\\)\\)\\)/' app/src/main/java/com/hepexta/allagents/agents/master/MasterAgent.java)",
+      "Bash(grep -m1 -B2 -A10 'ERROR!$' target/surefire-reports/com.hepexta.allagents.agents.master.MasterAgentTest.txt)",
+      "Bash(./mvnw -pl app -am test -Dtest=ScratchToolLoopTest -Dsurefire.failIfNoSpecifiedTests=false)",
+      "Bash(python -)",
+      "Bash(cd /tmp)",
+      "Bash(unzip -q -o ~/.m2/repository/org/jacoco/jacoco-maven-plugin/0.8.13/jacoco-maven-plugin-0.8.13.jar META-INF/maven/plugin.xml -d jacoco-plugin)",
+      "Read(//tmp/**)",
+      "Bash(python3 -)",
+      "Bash(awk '/<goal>check<\\\\/goal>/,/<\\\\/mojo>/' META-INF/maven/plugin.xml)",
+      "Bash(awk '/<goal>report<\\\\/goal>/,/<\\\\/mojo>/' META-INF/maven/plugin.xml)",
+      "Bash(awk '/<goal>check<\\\\/goal>/,/<configuration>/' /tmp/jacoco-plugin/META-INF/maven/plugin.xml)",
+      "Bash(awk '/<goal>check<\\\\/goal>/,0' /tmp/jacoco-plugin/META-INF/maven/plugin.xml)",
+      "Bash(python3 -c \"print\\('no python'\\)\")",
+      "Bash(awk -F',' 'NR>1 && $7+0 > 0 {print $7\" missed of \"$6\" total : \"$3}' jacoco.csv)",
+      "Bash(awk -F',' 'NR>1 {missed=$7; total=$6; if \\(missed+0>0\\) print missed\" missed of \"total\" : \"$3}' jacoco.csv)",
+      "Bash(curl -s -X POST http://localhost:8080/api/agents/pdf-extractor/execute -H \"Content-Type: application/json\" -d '{\"instruction\":\"Extract the invoice number\",\"payload\":{\"pdfBase64\":\"JVBERi0xLjcKJcKlw7fCtwowIDIgb2JqCjw8L1R5cGUgL0NhdGFsb2cgL1BhZ2VzIDEgMCBSCj4+CmVuZG9iagoxIDAgb2JqCjw8L1R5cGUgL1BhZ2VzIC9LaWRzIFsyIDAgUl0gL0NvdW50IDEKPj4KZW5kb2JqCjIgMCBvYmoKPDwvVHlwZSAvUGFnZSAvUGFyZW50IDEgMCBSIC9NZWRpYUJveCBbMCAwIDYxMiA3OTJdIC9Db250ZW50cyAzIDAgUiAvUmVzb3VyY2VzIDw8L0ZvbnQgPDwvRjEgNCAwIFI+Pj4KPj4KZW5kb2JqCjMgMCBvYmoKPDwvTGVuZ3RoIDU4Pj4Kc3RyZWFtCkJUCi9GMSAxMiBUZgowIDcwMCBUZAooSW52b2ljZSAjNDIgVG90YWwgMTAwIFVTRCkgVGoKRVQKZW5kCmVuZHN0cmVhbQplbmRvYmoKNCAwIG9iago8PC9UeXBlIC9Gb250IC9TdWJ0eXBlIC9UeXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZz4+CmVuZG9iagp0cmFpbGVyCjw8L1Jvb3QgMSAwIFI+Pg==\"}}')",
+      "Bash(taskkill //F //IM java.exe)",
+      "Bash(./mvnw clean *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(python -m pytest test_app.py -v)",
+      "Bash(unzip -o -q ~/.m2/repository/org/springframework/ai/spring-ai-client-chat/2.0.1/spring-ai-client-chat-2.0.1.jar)"
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+name: master-date
+description: Ask the master agent for today's date (exercises the getCurrentDate tool).
+agent: master
+preset: concise
+message: "What is today's date?"

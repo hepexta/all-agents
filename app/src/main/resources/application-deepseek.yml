@@ -1,0 +1,83 @@
+spring:
+  application:
+    name: all-agents
+  sql:
+    init:
+      mode: always
+  datasource:
+    url: jdbc:h2:file:./data/all-agents;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  ai:
+    model:
+   #   chat: anthropic
+      chat: deepseek
+  #  anthropic:
+ #     api-key: ${ANTHROPIC_AUTH_TOKEN:}
+      # base-url: ${ANTHROPIC_BASE_URL:https://api.deepseek.com/anthropic}
+#      base-url: ${ANTHROPIC_BASE_URL:http://localhost:20128/v1}
+ #     chat:
+  #      options:
+   #       model: ${ANTHROPIC_MODEL:deepseek-v4-pro[1m]}
+    deepseek:
+      api-key: ${ANTHROPIC_AUTH_TOKEN:}
+      base-url: ${ANTHROPIC_BASE_URL:http://localhost:20128/v1}
+      chat:
+        options:
+          model: ${ANTHROPIC_MODEL:deepseek-v4-pro[1m]}
+
+server:
+  port: 8080
+
+app:
+  a2a:
+    mode: in-process
+    base-url: http://localhost:8080
+  memory:
+    retrieve-size: 20
+  persistence:
+    mode: h2            # conversation storage backend: h2 (embedded DB) | jsonl (filesystem)
+    data-dir: ./data    # jsonl mode: conversations are stored under <data-dir>/conversations
+  pdf:
+    max-pages: 50
+    max-chars: 100000
+  presets:
+    default:
+      name: Default
+      system-prompt: null
+      temperature: 0.7
+    code-review:
+      name: Code Review
+      system-prompt: "You are a strict senior code reviewer. Review code critically and point out bugs, security issues and style problems."
+      temperature: 0.2
+    concise:
+      name: Concise
+      system-prompt: "Answer as briefly as possible, one or two sentences."
+      temperature: 0.3
+  guardrails:
+    prompt-injection:
+      deny-phrases:
+        - "ignore previous instructions"
+        - "ignore all previous"
+        - "reveal your system prompt"
+        - "jailbreak"
+        - "disregard prior"
+    sensitive-data:
+      enabled: true
+    length:
+      max-input-chars: 20000
+      max-output-chars: 20000
+  agents:
+    master-system-prompt: >-
+      You are the master agent of a multi-agent platform. You orchestrate a team of
+      specialist agents. You have tools to list agents, inspect their status, start and
+      stop them, search the tool catalog and delegate tasks to specialists over the A2A
+      protocol. Rules: always use the tools instead of guessing; delegate specialized
+      work (e.g. PDF data extraction) to the right specialist agent; answer general
+      questions yourself; never claim capabilities that belong to specialist agents.
+    pdf-system-prompt: >-
+      You are a PDF data extraction specialist. You receive the full text of a PDF
+      document plus an extraction instruction. Return exactly the requested data in the
+      requested format. If the requested data is not present in the document, say so
+      explicitly.

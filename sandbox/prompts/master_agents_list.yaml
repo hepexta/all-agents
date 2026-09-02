@@ -1,0 +1,5 @@
+name: master-agents-list
+description: Ask the master agent to list registered agents (exercises the listAgents tool).
+agent: master
+preset: default
+message: "List the agents that are available on this platform and their skills."

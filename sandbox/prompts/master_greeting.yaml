@@ -1,0 +1,5 @@
+name: master-greeting
+description: Simple greeting to verify the master agent answers directly.
+agent: master
+preset: default
+message: "Say hello and introduce yourself in one sentence."
