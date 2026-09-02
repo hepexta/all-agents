@@ -16,7 +16,7 @@ public final class TestProperties {
 
     public static AppProperties of(int pdfMaxPages, int pdfMaxChars, int pdfMaxBytes, String pdfAllowedDir) {
         return new AppProperties(
-                new AppProperties.Agents("master prompt", "pdf prompt"),
+                new AppProperties.Agents("master prompt", "pdf prompt", "postgres prompt"),
                 Map.of(),
                 new AppProperties.Guardrails(
                         new AppProperties.Guardrails.PromptInjection(List.of("ignore previous instructions")),

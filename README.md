@@ -37,6 +37,12 @@ agent extracts data from PDF documents.
   `app.pdf.allowed-dir` (default `./data/pdf-uploads`) — paths outside it are rejected.
   Decoded PDFs are capped at `app.pdf.max-bytes` (default 20 MB) and the extracted text
   is screened for prompt-injection phrases before it reaches the LLM.
+- **Postgres agent** (`postgres-expert`): PostgreSQL schema design, indexing, query
+  optimization, partitioning, MVCC/VACUUM, replication, backup/recovery, monitoring.
+  Answers from vendored reference guides (`app/src/main/resources/skills/postgres/`,
+  MIT-licensed from the PlanetScale database-skills repo, PlanetScale-specific topics
+  trimmed), loaded per-topic via its `loadReference` tool. The master agent delegates
+  PostgreSQL questions to it over A2A.
 - **Guardrails** (input + output): prompt-injection deny-list, sensitive-data redaction
   (emails, API keys, cards, phones), length limits. Applied via a ChatClient advisor
   (chat path) and `AgentRuntimeService` (direct agent calls).

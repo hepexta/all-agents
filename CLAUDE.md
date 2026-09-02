@@ -14,6 +14,8 @@ Modules (Maven multi-module): `core` (hexagonal core: domain, ports, agent frame
 `sandbox` (Python prompt testing). `ui` and `sandbox` are pom-packaging containers —
 Python is not built by Maven.
 
+Note: claude is running in Git Bash session on Windows VM.
+
 ## Commands
 
 Use the Maven wrapper (Maven 3.9.16). In bash: `./mvnw`; in cmd/PowerShell: `mvnw.cmd`.

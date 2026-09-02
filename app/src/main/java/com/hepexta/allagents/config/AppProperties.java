@@ -15,7 +15,7 @@ public record AppProperties(
         Persistence persistence,
         A2a a2a) {
 
-    public record Agents(String masterSystemPrompt, String pdfSystemPrompt) {
+    public record Agents(String masterSystemPrompt, String pdfSystemPrompt, String postgresSystemPrompt) {
     }
 
     public record Preset(String name, String systemPrompt, Double temperature) {
