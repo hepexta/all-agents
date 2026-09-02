@@ -36,7 +36,7 @@ public record AppProperties(
         }
     }
 
-    public record Pdf(int maxPages, int maxChars) {
+    public record Pdf(int maxPages, int maxChars, int maxBytes, String allowedDir) {
     }
 
     public record Memory(int retrieveSize) {

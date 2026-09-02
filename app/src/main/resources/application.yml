@@ -28,6 +28,7 @@ spring:
           model: ${ANTHROPIC_MODEL:deepseek-v4-pro[1m]}
 
 server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
   port: 8080
 
 app:
@@ -42,6 +43,8 @@ app:
   pdf:
     max-pages: 50
     max-chars: 100000
+    max-bytes: 20971520 # 20 MB hard cap on decoded PDF size (rejects oversized uploads before parsing)
+    allowed-dir: ${PDF_ALLOWED_DIR:./data/pdf-uploads}   # pdfPath payloads may only read PDFs from this directory
   presets:
     default:
       name: Default

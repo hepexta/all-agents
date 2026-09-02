@@ -220,4 +220,26 @@ class FileConversationRepositoryTest {
 
         assertEquals(threads * appendsPerThread, repository.find(created.id()).orElseThrow().entries().size());
     }
+
+    @Test
+    void traversalIdsAreRejectedAndNothingIsWrittenOutside() throws Exception {
+        FileConversationRepository repository = repository();
+        ConversationId outside = new ConversationId("../escape");
+
+        assertThrows(IllegalArgumentException.class, () -> repository.find(outside));
+        assertThrows(IllegalArgumentException.class,
+                () -> repository.append(outside, new ChatEntry("user", "nope", LocalDateTime.now())));
+        assertThrows(IllegalArgumentException.class, () -> repository.updateTitle(outside, "nope"));
+        assertTrue(Files.notExists(tempDir.resolve("escape")));
+    }
+
+    @Test
+    void dotDotOnlyIdIsRejected() {
+        FileConversationRepository repository = repository();
+        ConversationId parent = new ConversationId("..");
+
+        assertThrows(IllegalArgumentException.class, () -> repository.find(parent));
+        assertThrows(IllegalArgumentException.class,
+                () -> repository.append(parent, new ChatEntry("user", "nope", LocalDateTime.now())));
+    }
 }

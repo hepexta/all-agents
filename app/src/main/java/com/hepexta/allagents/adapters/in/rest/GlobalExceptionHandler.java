@@ -5,6 +5,8 @@ import com.hepexta.allagents.exception.AgentNotFoundException;
 import com.hepexta.allagents.exception.AgentStoppedException;
 import com.hepexta.allagents.exception.ConversationNotFoundException;
 import com.hepexta.allagents.exception.GuardrailBlockedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     public record ErrorResponse(String code, String message) {
     }
@@ -55,6 +59,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse internal(Exception e) {
-        return new ErrorResponse("internal_error", e.getMessage());
+        // Log the full exception server-side; never expose its message to the client.
+        log.error("Unhandled exception", e);
+        return new ErrorResponse("internal_error", "an unexpected error occurred");
     }
 }

@@ -26,13 +26,26 @@ public class PdfTextExtractor {
 
     public ExtractedText fromPath(String path) {
         try {
-            return fromBytes(Files.readAllBytes(Path.of(path)));
+            Path allowedRoot = Path.of(properties.pdf().allowedDir()).toAbsolutePath().normalize();
+            if (!Files.isDirectory(allowedRoot)) {
+                Files.createDirectories(allowedRoot);
+            }
+            Path realRoot = allowedRoot.toRealPath();
+            Path resolved = Path.of(path).toAbsolutePath().normalize().toRealPath();
+            if (!resolved.startsWith(realRoot)) {
+                throw new IllegalArgumentException("pdf path is outside the allowed directory: " + realRoot);
+            }
+            return fromBytes(Files.readAllBytes(resolved));
         } catch (IOException e) {
             throw new IllegalArgumentException("cannot read pdf at path: " + path, e);
         }
     }
 
     public ExtractedText fromBytes(byte[] bytes) {
+        int maxBytes = properties.pdf().maxBytes();
+        if (maxBytes > 0 && bytes.length > maxBytes) {
+            throw new IllegalArgumentException("pdf too large: " + bytes.length + " bytes (max " + maxBytes + ")");
+        }
         try (PDDocument document = Loader.loadPDF(bytes)) {
             int totalPages = document.getNumberOfPages();
             PDFTextStripper stripper = new PDFTextStripper();

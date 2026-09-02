@@ -80,14 +80,15 @@ class A2aControllerTest {
     }
 
     @Test
-    void failedExecutionReturnsJsonRpcError() throws Exception {
+    void failedExecutionReturnsJsonRpcErrorWithoutInternalDetails() throws Exception {
         mockMvc.perform(post("/a2a/agents/pdf-extractor")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"jsonrpc":"2.0","id":"3","method":"message/send","params":{"message":{"role":"user","parts":[{"kind":"text","text":"extract"}]}}}
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.error.code").value(-32000));
+                .andExpect(jsonPath("$.error.code").value(-32000))
+                .andExpect(jsonPath("$.error.message").value("agent execution failed"));
     }
 
     @Test

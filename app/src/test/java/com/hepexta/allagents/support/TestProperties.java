@@ -11,6 +11,10 @@ public final class TestProperties {
     }
 
     public static AppProperties of(int pdfMaxPages, int pdfMaxChars) {
+        return of(pdfMaxPages, pdfMaxChars, Integer.MAX_VALUE, System.getProperty("java.io.tmpdir") + "/all-agents-pdf");
+    }
+
+    public static AppProperties of(int pdfMaxPages, int pdfMaxChars, int pdfMaxBytes, String pdfAllowedDir) {
         return new AppProperties(
                 new AppProperties.Agents("master prompt", "pdf prompt"),
                 Map.of(),
@@ -18,7 +22,7 @@ public final class TestProperties {
                         new AppProperties.Guardrails.PromptInjection(List.of("ignore previous instructions")),
                         new AppProperties.Guardrails.SensitiveData(true),
                         new AppProperties.Guardrails.Length(1000, 1000)),
-                new AppProperties.Pdf(pdfMaxPages, pdfMaxChars),
+                new AppProperties.Pdf(pdfMaxPages, pdfMaxChars, pdfMaxBytes, pdfAllowedDir),
                 new AppProperties.Memory(20),
                 new AppProperties.Persistence("h2", "./data"),
                 new AppProperties.A2a("http://localhost:8080"));

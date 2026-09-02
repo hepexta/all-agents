@@ -13,6 +13,8 @@ import com.hepexta.allagents.application.TaskStore;
 import com.hepexta.allagents.exception.AgentNotFoundException;
 import com.hepexta.allagents.ports.AgentRegistry;
 import com.hepexta.allagents.ports.AgentRuntime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +34,8 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/a2a")
 public class A2aController {
+
+    private static final Logger log = LoggerFactory.getLogger(A2aController.class);
 
     private final AgentRegistry registry;
     private final AgentRuntime runtime;
@@ -75,9 +79,11 @@ public class A2aController {
             taskStore.put(taskStore.get(taskId).orElseThrow().completed(reply));
             return JsonRpcResponse.ok(request.id(), reply);
         } catch (RuntimeException e) {
-            AgentMessage errorMessage = AgentMessage.of(UUID.randomUUID().toString(), "agent", "failed: " + e.getMessage());
+            // Log details server-side; clients only get a generic failure message.
+            log.error("A2A message/send failed for agent {}", name, e);
+            AgentMessage errorMessage = AgentMessage.of(UUID.randomUUID().toString(), "agent", "agent execution failed");
             taskStore.put(taskStore.get(taskId).orElseThrow().failed(errorMessage));
-            return JsonRpcResponse.error(request.id(), -32000, e.getMessage());
+            return JsonRpcResponse.error(request.id(), -32000, "agent execution failed");
         }
     }
 

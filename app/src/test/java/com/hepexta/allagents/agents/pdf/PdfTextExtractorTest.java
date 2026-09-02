@@ -3,12 +3,19 @@ package com.hepexta.allagents.agents.pdf;
 import com.hepexta.allagents.support.PdfFixtures;
 import com.hepexta.allagents.support.TestProperties;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PdfTextExtractorTest {
+
+    @TempDir
+    Path tempDir;
 
     private final PdfTextExtractor extractor = new PdfTextExtractor(TestProperties.of(10, 1000));
 
@@ -38,7 +45,41 @@ class PdfTextExtractorTest {
     }
 
     @Test
-    void missingPathThrows() {
-        assertThrows(IllegalArgumentException.class, () -> extractor.fromPath("C:/definitely/not/here.pdf"));
+    void oversizedPdfIsRejectedBeforeParsing() {
+        PdfTextExtractor small = new PdfTextExtractor(TestProperties.of(10, 1000, 10, tempDir.toString()));
+        assertThrows(IllegalArgumentException.class, () -> small.fromBytes(PdfFixtures.createPdf("Hello PDF world")));
+    }
+
+    @Test
+    void missingPathThrowsAndCreatesAllowedDirLazily() {
+        PdfTextExtractor withAllowedDir = new PdfTextExtractor(
+                TestProperties.of(10, 1000, Integer.MAX_VALUE, tempDir.resolve("not-yet-created").toString()));
+        assertThrows(IllegalArgumentException.class, () -> withAllowedDir.fromPath("C:/definitely/not/here.pdf"));
+        assertTrue(Files.isDirectory(tempDir.resolve("not-yet-created")));
+    }
+
+    @Test
+    void extractsFromPathInsideAllowedDir() throws Exception {
+        Path allowedDir = tempDir.resolve("pdfs");
+        Files.createDirectories(allowedDir);
+        Path pdf = allowedDir.resolve("invoice.pdf");
+        Files.write(pdf, PdfFixtures.createPdf("Allowed dir content"));
+
+        PdfTextExtractor withAllowedDir = new PdfTextExtractor(
+                TestProperties.of(10, 1000, Integer.MAX_VALUE, allowedDir.toString()));
+        var extracted = withAllowedDir.fromPath(pdf.toString());
+        assertTrue(extracted.text().contains("Allowed dir content"));
+    }
+
+    @Test
+    void pathOutsideAllowedDirIsRejected() throws Exception {
+        Path allowedDir = tempDir.resolve("allowed");
+        Files.createDirectories(allowedDir);
+        Path outside = tempDir.resolve("outside.pdf");
+        Files.write(outside, PdfFixtures.createPdf("Secret content"));
+
+        PdfTextExtractor withAllowedDir = new PdfTextExtractor(
+                TestProperties.of(10, 1000, Integer.MAX_VALUE, allowedDir.toString()));
+        assertThrows(IllegalArgumentException.class, () -> withAllowedDir.fromPath(outside.toString()));
     }
 }

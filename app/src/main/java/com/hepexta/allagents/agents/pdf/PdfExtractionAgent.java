@@ -8,7 +8,10 @@ import com.hepexta.allagents.domain.agent.AgentId;
 import com.hepexta.allagents.domain.agent.AgentRequest;
 import com.hepexta.allagents.domain.agent.AgentResult;
 import com.hepexta.allagents.domain.agent.AgentSkill;
+import com.hepexta.allagents.domain.guardrail.GuardrailResult;
 import com.hepexta.allagents.exception.AgentExecutionException;
+import com.hepexta.allagents.exception.GuardrailBlockedException;
+import com.hepexta.allagents.guardrails.PromptInjectionGuardrail;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
@@ -25,11 +28,16 @@ public class PdfExtractionAgent extends AbstractAgent {
     private final ChatClient chatClient;
     private final PdfTextExtractor extractor;
     private final AppProperties properties;
+    private final PromptInjectionGuardrail promptInjectionGuardrail;
 
-    public PdfExtractionAgent(ChatClient.Builder builder, PdfTextExtractor extractor, AppProperties properties) {
+    public PdfExtractionAgent(ChatClient.Builder builder,
+                              PdfTextExtractor extractor,
+                              AppProperties properties,
+                              PromptInjectionGuardrail promptInjectionGuardrail) {
         super(agentDefinition());
         this.extractor = extractor;
         this.properties = properties;
+        this.promptInjectionGuardrail = promptInjectionGuardrail;
         this.chatClient = builder
                 .defaultSystem(properties.agents().pdfSystemPrompt())
                 .build();
@@ -51,6 +59,12 @@ public class PdfExtractionAgent extends AbstractAgent {
     @Override
     protected AgentResult doExecute(AgentRequest request) {
         PdfTextExtractor.ExtractedText extracted = extract(request);
+        // The document text is attacker-controlled and lands inside the LLM prompt:
+        // screen it for prompt-injection phrases before composing the prompt.
+        GuardrailResult check = promptInjectionGuardrail.checkInput(extracted.text());
+        if (!check.allowed()) {
+            throw new AgentExecutionException(id(), new GuardrailBlockedException(check.reason()));
+        }
         String prompt = "Extraction instruction: " + request.instruction()
                 + "\n\nDocument text:\n" + extracted.text();
         String content = chatClient.prompt().user(prompt).call().content();

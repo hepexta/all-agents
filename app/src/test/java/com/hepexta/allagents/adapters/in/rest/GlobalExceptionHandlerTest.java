@@ -52,8 +52,9 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void internalError() {
-        var response = handler.internal(new RuntimeException("boom"));
+    void internalErrorDoesNotLeakExceptionDetails() {
+        var response = handler.internal(new RuntimeException("boom: secret internals"));
         assertEquals("internal_error", response.code());
+        assertEquals("an unexpected error occurred", response.message());
     }
 }

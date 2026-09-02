@@ -33,7 +33,10 @@ agent extracts data from PDF documents.
   `getAgentStatus`/`listAgents`), knows every agent, skill and tool (`toolSearchTool` —
   Spring AI ToolSearch, `getCurrentDate`).
 - **PDF agent** (`pdf-extractor`): PDFBox text extraction + LLM formatting; accepts
-  `pdfBase64` or `pdfPath` payloads.
+  `pdfBase64` payloads or `pdfPath` payloads restricted to the configured
+  `app.pdf.allowed-dir` (default `./data/pdf-uploads`) — paths outside it are rejected.
+  Decoded PDFs are capped at `app.pdf.max-bytes` (default 20 MB) and the extracted text
+  is screened for prompt-injection phrases before it reaches the LLM.
 - **Guardrails** (input + output): prompt-injection deny-list, sensitive-data redaction
   (emails, API keys, cards, phones), length limits. Applied via a ChatClient advisor
   (chat path) and `AgentRuntimeService` (direct agent calls).

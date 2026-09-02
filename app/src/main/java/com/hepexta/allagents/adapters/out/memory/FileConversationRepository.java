@@ -158,7 +158,13 @@ public class FileConversationRepository implements ConversationRepository {
     }
 
     private Path dirFor(ConversationId id) {
-        return conversationsDir.resolve(id.value());
+        Path dir = conversationsDir.resolve(id.value()).normalize();
+        // Conversation ids arrive from the REST layer: refuse ids that would
+        // escape the data directory (path traversal / arbitrary file access).
+        if (!dir.startsWith(conversationsDir)) {
+            throw new IllegalArgumentException("conversation id escapes the data directory");
+        }
+        return dir;
     }
 
     private static <T> T uncheck(IoSupplier<T> supplier) {
